@@ -1,4 +1,7 @@
-// Server-side Vercel API client. Reads VERCEL_TOKEN / VERCEL_TEAM_ID from env.
+// Server-side Vercel API client. Reads VC_TOKEN / VC_TEAM_ID from env.
+// (Not VERCEL_*: Vercel reserves the VERCEL_ prefix and rejects such env vars
+// on deployed projects. The old names are still accepted as a fallback so
+// existing local .env files keep working.)
 
 const API = "https://api.vercel.com";
 
@@ -12,11 +15,11 @@ export async function vercelFetch<T>(
   path: string,
   init?: RequestInit
 ): Promise<{ data?: T; error?: VercelError }> {
-  const token = process.env.VERCEL_TOKEN;
+  const token = process.env.VC_TOKEN ?? process.env.VERCEL_TOKEN;
   if (!token) {
-    return { error: { status: 500, code: "no_token", message: "VERCEL_TOKEN is not set" } };
+    return { error: { status: 500, code: "no_token", message: "VC_TOKEN is not set" } };
   }
-  const teamId = process.env.VERCEL_TEAM_ID;
+  const teamId = process.env.VC_TEAM_ID ?? process.env.VERCEL_TEAM_ID;
   const sep = path.includes("?") ? "&" : "?";
   const url = `${API}${path}${teamId ? `${sep}teamId=${teamId}` : ""}`;
   const res = await fetch(url, {
